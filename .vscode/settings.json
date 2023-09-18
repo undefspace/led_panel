@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "cmath": "cpp",
+        "analog_clock.h": "c",
+        "time.h": "c",
+        "panel_loop.h": "c",
+        "binary_clock.h": "c",
+        "stdint.h": "c"
+    }
+}
