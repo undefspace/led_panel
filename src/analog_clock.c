@@ -20,7 +20,7 @@ void analog_clock_draw(Olivec_Canvas canvas) {
     uint8_t hr_r = min_r * 2/3;
     
     // calculate hand angles
-    uint32_t seconds = ((time.tm_hour % 12) * 3600) + (time.tm_min * 60) + time.tm_sec;
+    int32_t seconds = ((time.tm_hour % 12) * 3600) + (time.tm_min * 60) + time.tm_sec;
     float sec_angle = TWO_PI * (float)(seconds - 15) / 60;
     float min_angle = TWO_PI * (float)(seconds - 900) / 3600;
     float hr_angle = TWO_PI * (float)(seconds - (12*900)) / (12 * 3600);

@@ -8,11 +8,13 @@
 #include "binary_clock.h"
 #include "decimal_clock.h"
 #include "hex_clock.h"
+#include "weather.h"
 ui_element_t persistent_elements[] = {
     analog_clock,
     binary_clock,
     decimal_clock,
     hex_clock,
+    weather
 };
 #define PERSISTENT_ELEMENT_COUNT (sizeof(persistent_elements) / sizeof(ui_element_t))
 
