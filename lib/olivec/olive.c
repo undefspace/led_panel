@@ -1,3 +1,11 @@
+// This version has been changed from the original one
+// (https://github.com/tsoding/olive.c) in the following ways:
+//   - removed the builtin font
+//   - made function definitions not inlined
+//   - added `olivec_blend_color_fraction'
+//   - added `olivec_line_aa'
+//   - reworked the way fonts and text work
+//
 // Copyright 2022 Alexey Kutepov <reximkut@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -18,13 +26,6 @@
 // LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
-// This version has been changed from the original one
-// (https://github.com/tsoding/olive.c) in the following ways:
-//   - removed the builtin font
-//   - made function definitions not inlined
-//   - added `olivec_blend_color_fraction'
-//   - added `olivec_line_aa'
 
 #ifndef OLIVE_H_
 #define OLIVE_H_
