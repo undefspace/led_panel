@@ -5,6 +5,11 @@
         "time.h": "c",
         "panel_loop.h": "c",
         "binary_clock.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "render_process.h": "c",
+        "render_task.h": "c",
+        "freertos.h": "c",
+        "config.h": "c",
+        "esp_log.h": "c"
     }
 }

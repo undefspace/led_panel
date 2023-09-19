@@ -1,3 +1,5 @@
+#pragma once
+
 // NTP
 #define NTP_SERVER          "pool.ntp.org"
 #define NTP_OFFSET          (3600 * 3) // GMT+3
@@ -14,3 +16,11 @@
 // LED strip
 #define STRIP_PIN_D 21
 #define STRIP_WIDTH 240
+
+// misc
+#define RENDER_QUEUE_LEN       16
+#define WEATHER_LOCATION       "Moscow"
+#define WEATHER_USE_FEELS_LIKE true
+
+// credentials
+#include "wifi_creds.h"

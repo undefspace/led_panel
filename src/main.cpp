@@ -4,7 +4,8 @@
 #include <time.h>
 #include "config.h"
 #include "wifi_creds.h"
-#include "panel_loop.h"
+#include "render_task.h"
+#include "weather_fetch_task.h"
 
 MatrixPanel_I2S_DMA* panel = nullptr;
 static uint32_t main_panel_buffer[PANEL_WIDTH * PANEL_HEIGHT];
@@ -15,10 +16,7 @@ void setup(void) {
     delay(1000);
 
     // connect to to Wi-Fi
-    Serial.println("Connecting to Wi-Fi...");
     WiFi.begin(WIFI_SSID, WIFI_PASS);
-    while(WiFi.status() != WL_CONNECTED);
-    Serial.println("Connected to Wi-Fi");
 
     // set up NTP
     configTime(NTP_OFFSET, NTP_DAYLIGHT_OFFSET, NTP_SERVER);
@@ -34,29 +32,33 @@ void setup(void) {
     panel->begin();
     panel->setBrightness8(255);
 
+    // create tasks
+    xTaskCreate(render_task, "led_panel", 8192, main_panel_buffer, 10, NULL);
+    xTaskCreate(weather_fetch_task, "weather", 8192, NULL, 10, NULL);
+
     // set up strip
     FastLED.addLeds<WS2812B, STRIP_PIN_D>(strip, STRIP_WIDTH);
 }
 
+// the render task calls this function to set a pixel
+// we need this wrapper because the rest of the project is written in C
+void dma_draw_rgb(uint8_t x, uint8_t y, uint32_t color) {
+    uint8_t r = (color >> 16) & 0xff;
+    uint8_t g = (color >> 8) & 0xff;
+    uint8_t b = color & 0xff;
+    panel->drawPixelRGB888(x, y, r, g, b);
+}
+
+
 void loop(void) {
-    uint64_t frame_start = micros();
-
-    // draw persistent elements
-    panel_loop(main_panel_buffer);
-
-    // transfer olivec canvas to DMA buffer
-    for(int y = 0; y < PANEL_HEIGHT; y++) {
-        for(int x = 0; x < PANEL_WIDTH; x++) {
-            uint32_t color = main_panel_buffer[(y * PANEL_WIDTH) + x];
-            uint8_t r = (color >> 16) & 0xff;
-            uint8_t g = (color >> 8) & 0xff;
-            uint8_t b = color & 0xff;
-            panel->drawPixelRGB888(x, y, r, g, b);
+    // send Wi-Fi status updates
+    render_task_notification_t notification = {
+        .type = rt_notif_wifi_status,
+        .u = {
+            .wifi_connected = WiFi.status() == WL_CONNECTED,
         }
-    }
+    };
+    xQueueSend(render_task_queue, &notification, 0);
 
-    // maintain refresh rate
-    uint64_t delta = micros() - frame_start;
-    if(delta < PANEL_DELTA_TARGET)
-        delayMicroseconds(PANEL_DELTA_TARGET - delta);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 }

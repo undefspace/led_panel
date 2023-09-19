@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "fonts/big_clock.h"
 
+uint16_t weather_status = 1;
+
 void _weather_draw_sun(Olivec_Canvas canvas) {
     olivec_circle(canvas, 4, 4, 2, WEATHER_SUN);
     OLIVEC_PIXEL(canvas, 0, 4) = WEATHER_SUN_RAYS;
@@ -32,16 +34,15 @@ void _weather_draw_thunder(Olivec_Canvas canvas) {
 }
 
 void weather_draw(Olivec_Canvas canvas) {
-    // TODO: get weather
-    int sun = 1;
-    int cloud = 1;
-    int rain = 1;
-    int thunder = 1;
-    int temp = 99;
+    int sun = weather_status & 1;
+    int cloud = weather_status & 2;
+    int rain = weather_status & 4;
+    int thunder = weather_status & 8;
+    int8_t temp = weather_status >> 8;
 
     // draw icons
     if(sun) {
-        Olivec_Canvas sun = olivec_subcanvas(canvas, cloud ? 6 : 2, cloud ? 1 : 2, 9, 9);
+        Olivec_Canvas sun = olivec_subcanvas(canvas, cloud ? 6 : 2, cloud ? 1 : 3, 9, 9);
         _weather_draw_sun(sun);
     }
     if(cloud) { 
@@ -59,6 +60,6 @@ void weather_draw(Olivec_Canvas canvas) {
 
     // draw text
     char buf[5];
-    sprintf(buf, "%c%02dC", temp > 0 ? '+' : '-', abs(temp));
+    sprintf(buf, "%c%02dC", temp >= 0 ? '+' : '-', abs(temp));
     olivec_text(canvas, buf, 14, 0, big_clock, WEATHER_TEXT);
 }
