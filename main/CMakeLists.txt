@@ -1,0 +1,12 @@
+idf_component_register(SRCS "analog_clock.c"
+                            "binary_clock.c"
+                            "decimal_clock.c"
+                            "hex_clock.c"
+                            "olive.c"
+                            "main.c"
+                            "render_task.c"
+                            "ui_element.c"
+                            "weather_fetch_task.c"
+                            "weather.c"
+                    INCLUDE_DIRS "include/"
+                    EMBED_TXTFILES "certs/isrg_root_x1.pem")

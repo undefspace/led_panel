@@ -1,15 +1,15 @@
 {
+    "idf.adapterTargetName": "esp32",
     "files.associations": {
-        "cmath": "cpp",
-        "analog_clock.h": "c",
-        "time.h": "c",
-        "panel_loop.h": "c",
-        "binary_clock.h": "c",
-        "stdint.h": "c",
-        "render_process.h": "c",
-        "render_task.h": "c",
-        "freertos.h": "c",
-        "config.h": "c",
-        "esp_log.h": "c"
+        "leddisplay.h": "c",
+        "periph_ctrl.h": "c",
+        "lldesc.h": "c",
+        "gpio.h": "c",
+        "overall_config.h": "c",
+        "weather_fetch_task.h": "c",
+        "stdlib.h": "c",
+        "nvs_flash.h": "c",
+        "esp_sntp.h": "c",
+        "sntp.h": "c"
     }
 }
