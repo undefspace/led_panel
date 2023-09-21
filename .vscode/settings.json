@@ -10,6 +10,14 @@
         "stdlib.h": "c",
         "nvs_flash.h": "c",
         "esp_sntp.h": "c",
-        "sntp.h": "c"
-    }
+        "sntp.h": "c",
+        "math.h": "c",
+        "time.h": "c",
+        "ui_element.h": "c",
+        "analog_clock.h": "c",
+        "esp_netif.h": "c",
+        "err.h": "c",
+        "esp_netif_ip_addr.h": "c"
+    },
+    "idf.flashBaudRate": "1500000"
 }

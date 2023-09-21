@@ -9,10 +9,22 @@
 #include <leddisplay.h>
 #include <nvs_flash.h>
 #include <stdlib.h>
-#include <esp_sntp.h>
-#include <sntp.h>
+#include <esp_netif.h>
+#include <esp_netif_sntp.h>
+#include <esp_adc/adc_oneshot.h>
+#include <esp_adc/adc_cali.h>
+#include <esp_adc/adc_cali_scheme.h>
+#include <stdlib.h>
 
-static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
+#define min(a, b) (a <= b ? a : b)
+#define max(a, b) (a >= b ? a : b)
+
+// declarations
+void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+void app_main(void);
+void brightness_task(void* ignored);
+
+void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
     if(event_base == WIFI_EVENT)
         if(event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED)
             esp_wifi_connect();
@@ -61,17 +73,69 @@ void app_main(void) {
     // set up NTP
     setenv("TZ", TZ, 1);
     tzset();
-    sntp_setservername(0, NTP_SERVER);
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_init();
+    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG("pool.ntp.org");
+    esp_netif_sntp_init(&config);
 
     // set up panel
     ESP_ERROR_CHECK(leddisplay_init());
 
     // create tasks
-    xTaskCreate(render_task, "renderer", 8192, NULL, 10, NULL);
+    xTaskCreate(render_task, "renderer", 4096, NULL, 10, NULL);
     xTaskCreate(weather_fetch_task, "weather", 8192, NULL, 10, NULL);
+    // xTaskCreate(fft_task, "fft", 2048, NULL, 10, NULL);
+    xTaskCreate(brightness_task, "brightness", 2048, NULL, 10, NULL);
 
     // set up strip
     // FastLED.addLeds<WS2812B, STRIP_PIN_D>(strip, STRIP_WIDTH);
+}
+
+void brightness_task(void* ignored) {
+    int latched_brightness = 100;
+
+    // set up ADC
+    adc_oneshot_unit_handle_t adc1_handle;
+    adc_oneshot_unit_init_cfg_t init_config1 = {
+        .unit_id = ADC_UNIT_1,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc1_handle));
+    adc_oneshot_chan_cfg_t config = {
+        .bitwidth = ADC_BITWIDTH_12,
+        .atten = ADC_ATTEN_DB_0,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_5, &config));
+
+    // set up ADC calibration
+    adc_cali_handle_t adc_cali_handle = NULL;
+    adc_cali_line_fitting_config_t cali_config = {
+        .unit_id = ADC_UNIT_1,
+        .atten = config.atten,
+        .bitwidth = config.bitwidth,
+    };
+    ESP_ERROR_CHECK(adc_cali_create_scheme_line_fitting(&cali_config, &adc_cali_handle));
+
+    while(1) {
+        // read ADC
+        int adc_raw, adc_millivolts;
+        ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC_CHANNEL_5, &adc_raw));
+        ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc_cali_handle, adc_raw, &adc_millivolts));
+
+        // calculate brightness
+        int lux = adc_millivolts / 5;
+        int brightness = min(max(lux * 3, 10), 255);
+        brightness = (brightness > 150) ? 255 : 10;
+
+        // latch brightness
+        if(abs(brightness - latched_brightness) > 30) {
+            latched_brightness = brightness;
+            // send notification to renderer
+            render_task_notification_t notif = {
+                .type = rt_notif_brightness,
+                .u.brightness = brightness
+            };
+            xQueueSend(render_task_queue, &notif, 0);
+        }
+
+        // repeat after 100ms
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
 }

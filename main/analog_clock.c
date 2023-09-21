@@ -2,7 +2,7 @@
 #include <time.h>
 #include <math.h>
 
-#define TWO_PI ((float)(2 * M_PI))
+#define TWO_PI ((float)(2 * 3.141))
 
 void analog_clock_draw(Olivec_Canvas canvas) {
     // get time

@@ -5,6 +5,7 @@
 #include <freertos/queue.h>
 #include "fonts/big_clock.h"
 #include <leddisplay.h>
+#include <esp_log.h>
 
 // elements
 #include "ui_element.h"
@@ -13,20 +14,15 @@
 #include "decimal_clock.h"
 #include "hex_clock.h"
 #include "weather.h"
-ui_element_t persistent_elements[] = {
-    analog_clock,
-    binary_clock,
-    decimal_clock,
-    hex_clock,
-    weather
-};
-#define PERSISTENT_ELEMENT_COUNT (sizeof(persistent_elements) / sizeof(ui_element_t))
+
+#define TAG "render_task"
 
 // renderer status
 QueueHandle_t render_task_queue;
 uint8_t connected_to_wifi;
 leddisplay_frame_t leddisplay_frame;
 static uint32_t buffer[PANEL_WIDTH * PANEL_HEIGHT];
+uint8_t brightness;
 
 void _render_task_process_notifications(void) { 
     render_task_notification_t notification;
@@ -34,16 +30,26 @@ void _render_task_process_notifications(void) {
         switch(notification.type) {
             // WiFi status
             case rt_notif_wifi_status:
+                ESP_LOGI(TAG, "rt_notif_wifi_status: %d", connected_to_wifi);
                 connected_to_wifi = notification.u.wifi_connected;
                 break;
             // weather update
             case rt_notif_weather:
                 #define wp notification.u.weather
-                weather_status = (wp.sun) | (wp.cloud << 1) | (wp.rain << 2) | (wp.thunder << 3) | (wp.temperature << 8);
+                ESP_LOGI(TAG, "rt_notif_weather: sun=%d, cloud=%d, rain=%d, thunder=%d, snow=%d, temperature=%d",
+                    wp.sun, wp.cloud, wp.rain, wp.thunder, wp.snow, wp.temperature);
+                weather_status = (wp.sun) | (wp.cloud << 1) | (wp.rain << 2) | (wp.thunder << 3)
+                    | (wp.snow << 4) | (wp.temperature << 8);
                 #undef wp
                 break;
             // door ring
             case rt_notif_door_ring:
+                ESP_LOGI(TAG, "rt_notif_door_ring");
+                break;
+            // door ring
+            case rt_notif_brightness:
+                ESP_LOGI(TAG, "rt_notif_brightness: %d", notification.u.brightness);
+                brightness = notification.u.brightness;
                 break;
         }
     }
@@ -63,14 +69,20 @@ void render_task(void* ignored) {
         olivec_fill(canvas, 0xff000000);
 
         // render persistent elements
-        for(uint8_t i = 0; i < PERSISTENT_ELEMENT_COUNT; i++)
-            ui_element_draw(canvas, persistent_elements[i]);
+        ui_element_draw(canvas, decimal_clock);
+        ui_element_draw(canvas, hex_clock);
+        ui_element_draw(canvas, binary_clock);
+        ui_element_draw(canvas, analog_clock);
+        ui_element_draw(canvas, weather);
 
         // darken the screen and draw a Wi-Fi icon if not connected to WiFi yet
         if(!connected_to_wifi) {
             olivec_rect(canvas, 0, 0, PANEL_WIDTH, PANEL_HEIGHT, 0xd0000000);
             olivec_text(canvas, "W", 27, 25, big_clock, 0xffffffff);
         }
+
+        // apply brightness
+        olivec_rect(canvas, 0, 0, PANEL_WIDTH, PANEL_HEIGHT, (255 - brightness) << 24);
         
         // update display
         for(uint8_t y = 0; y < PANEL_HEIGHT; y++) {
@@ -83,7 +95,6 @@ void render_task(void* ignored) {
             }
         }
         leddisplay_frame_update(&leddisplay_frame);
-        // leddisplay_pixel_update(1);
         
         // yield
         vTaskDelay(10 / portTICK_PERIOD_MS);

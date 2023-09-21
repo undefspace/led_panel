@@ -7,7 +7,7 @@
 #include "render_task.h"
 #include <esp_log.h>
 
-#define TAG "weather"
+#define TAG "weather_fetch_task"
 
 extern const char root_cert[] asm("_binary_isrg_root_x1_pem_start");
 
@@ -47,6 +47,8 @@ void weather_fetch_task(void* _ignored) {
         } else {
             ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
             // retry after 3s
+            esp_http_client_close(client);
+            esp_http_client_cleanup(client);
             vTaskDelay(3000 / portTICK_PERIOD_MS);
             continue;
         }
