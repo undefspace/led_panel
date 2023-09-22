@@ -1,10 +1,10 @@
-#include "weather_fetch_task.h"
+#include "tasks/weather_fetch.h"
 #include "overall_config.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 #include <esp_http_client.h>
 #include <cJSON.h>
-#include "render_task.h"
+#include "tasks/render.h"
 #include <esp_log.h>
 
 #define TAG "weather_fetch_task"

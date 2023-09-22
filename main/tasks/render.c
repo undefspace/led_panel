@@ -1,4 +1,4 @@
-#include "render_task.h"
+#include "tasks/render.h"
 #include "overall_config.h"
 #include "olive.h"
 #include <freertos/FreeRTOS.h>
@@ -9,12 +9,12 @@
 
 // elements
 #include "ui_element.h"
-#include "analog_clock.h"
-#include "binary_clock.h"
-#include "decimal_clock.h"
-#include "hex_clock.h"
-#include "weather.h"
-#include "spectrum.h"
+#include "elements/analog_clock.h"
+#include "elements/binary_clock.h"
+#include "elements/decimal_clock.h"
+#include "elements/hex_clock.h"
+#include "elements/weather.h"
+#include "elements/spectrum.h"
 
 #define TAG "render_task"
 

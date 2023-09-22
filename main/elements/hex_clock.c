@@ -1,4 +1,4 @@
-#include "hex_clock.h"
+#include "elements/hex_clock.h"
 #include <time.h>
 #include <stdio.h>
 #include "fonts/small_clock.h"

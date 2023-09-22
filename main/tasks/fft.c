@@ -1,11 +1,11 @@
-#include "fft_task.h"
+#include "tasks/fft.h"
 #include <fft.h>
 #include <esp_adc/adc_continuous.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_log.h>
 #include <math.h>
-#include "render_task.h"
+#include "tasks/render.h"
 
 #define TAG "fft_task"
 

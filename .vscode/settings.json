@@ -26,7 +26,12 @@
         "string": "c",
         "string_view": "c",
         "spectrum.h": "c",
-        "esp_log.h": "c"
+        "esp_log.h": "c",
+        "cjson.h": "c",
+        "decimal_clock.h": "c",
+        "hex_clock.h": "c",
+        "weather.h": "c",
+        "big_clock.h": "c"
     },
     "idf.flashBaudRate": "1500000"
 }

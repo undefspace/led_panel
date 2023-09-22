@@ -1,4 +1,4 @@
-#include "decimal_clock.h"
+#include "elements/decimal_clock.h"
 #include <time.h>
 #include <stdio.h>
 #include "fonts/big_clock.h"

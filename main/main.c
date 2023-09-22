@@ -2,9 +2,9 @@
 #include <sys/time.h>
 #include "overall_config.h"
 #include "wifi_creds.h"
-#include "render_task.h"
-#include "weather_fetch_task.h"
-#include "fft_task.h"
+#include "tasks/render.h"
+#include "tasks/weather_fetch.h"
+#include "tasks/fft.h"
 #include <esp_wifi.h>
 #include <esp_log.h>
 #include <leddisplay.h>
@@ -78,7 +78,7 @@ void app_main(void) {
     // set up NTP
     setenv("TZ", TZ, 1);
     tzset();
-    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG("pool.ntp.org");
+    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG(NTP_SERVER);
     esp_netif_sntp_init(&config);
 
     // set up panel
