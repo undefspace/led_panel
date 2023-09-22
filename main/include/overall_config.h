@@ -4,7 +4,6 @@
 #define NTP_SERVER  "pool.ntp.org"
 #define TZ          "GMT-3"
 
-
 // LED panel
 #define PANEL_WIDTH  64
 #define PANEL_HEIGHT 64
@@ -16,6 +15,10 @@
 // LED strip
 #define STRIP_PIN_D 21
 #define STRIP_WIDTH 240
+
+// spectrum
+#define FFT_SIZE               512
+#define SPECTRUM_FPS           60
 
 // misc
 #define RENDER_QUEUE_LEN       16

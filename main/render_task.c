@@ -14,6 +14,7 @@
 #include "decimal_clock.h"
 #include "hex_clock.h"
 #include "weather.h"
+#include "spectrum.h"
 
 #define TAG "render_task"
 
@@ -22,7 +23,7 @@ QueueHandle_t render_task_queue;
 uint8_t connected_to_wifi;
 leddisplay_frame_t leddisplay_frame;
 static uint32_t buffer[PANEL_WIDTH * PANEL_HEIGHT];
-uint8_t brightness;
+uint8_t brightness = 255;
 
 void _render_task_process_notifications(void) { 
     render_task_notification_t notification;
@@ -46,10 +47,14 @@ void _render_task_process_notifications(void) {
             case rt_notif_door_ring:
                 ESP_LOGI(TAG, "rt_notif_door_ring");
                 break;
-            // door ring
+            // brightness
             case rt_notif_brightness:
                 ESP_LOGI(TAG, "rt_notif_brightness: %d", notification.u.brightness);
                 brightness = notification.u.brightness;
+                break;
+            // fft buffer
+            case rt_notif_fft:
+                // don't log (too frequent)
                 break;
         }
     }
@@ -74,6 +79,7 @@ void render_task(void* ignored) {
         ui_element_draw(canvas, binary_clock);
         ui_element_draw(canvas, analog_clock);
         ui_element_draw(canvas, weather);
+        ui_element_draw(canvas, spectrum);
 
         // darken the screen and draw a Wi-Fi icon if not connected to WiFi yet
         if(!connected_to_wifi) {

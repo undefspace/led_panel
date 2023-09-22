@@ -1,4 +1,6 @@
-idf_component_register(SRCS "analog_clock.c"
+idf_component_register(SRCS "spectrum.c"
+                            "fft_task.c"
+                            "analog_clock.c"
                             "binary_clock.c"
                             "decimal_clock.c"
                             "hex_clock.c"

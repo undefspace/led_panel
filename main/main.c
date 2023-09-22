@@ -4,6 +4,7 @@
 #include "wifi_creds.h"
 #include "render_task.h"
 #include "weather_fetch_task.h"
+#include "fft_task.h"
 #include <esp_wifi.h>
 #include <esp_log.h>
 #include <leddisplay.h>
@@ -80,10 +81,10 @@ void app_main(void) {
     ESP_ERROR_CHECK(leddisplay_init());
 
     // create tasks
-    xTaskCreate(render_task, "renderer", 4096, NULL, 10, NULL);
+    xTaskCreate(render_task,        "renderer", 4096, NULL, 10, NULL);
     xTaskCreate(weather_fetch_task, "weather", 8192, NULL, 10, NULL);
-    // xTaskCreate(fft_task, "fft", 2048, NULL, 10, NULL);
-    xTaskCreate(brightness_task, "brightness", 2048, NULL, 10, NULL);
+    xTaskCreate(fft_task,           "fft", 4096, NULL, 10, NULL);
+    // xTaskCreate(brightness_task,    "brightness", 2048, NULL, 10, NULL);
 
     // set up strip
     // FastLED.addLeds<WS2812B, STRIP_PIN_D>(strip, STRIP_WIDTH);
@@ -115,14 +116,18 @@ void brightness_task(void* ignored) {
 
     while(1) {
         // read ADC
-        int adc_raw, adc_millivolts;
-        ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC_CHANNEL_5, &adc_raw));
-        ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc_cali_handle, adc_raw, &adc_millivolts));
+        int adc_raw_total, adc_millivolts;
+        for(int i = 0; i < 10; i++) {
+            int adc_raw;
+            ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC_CHANNEL_5, &adc_raw));
+            adc_raw_total += adc_raw;
+        }
+        adc_raw_total /= 10;
+        ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc_cali_handle, adc_raw_total, &adc_millivolts));
 
         // calculate brightness
         int lux = adc_millivolts / 5;
-        int brightness = min(max(lux * 3, 10), 255);
-        brightness = (brightness > 150) ? 255 : 10;
+        int brightness = min(max(lux * 4, 10), 255);
 
         // latch brightness
         if(abs(brightness - latched_brightness) > 30) {

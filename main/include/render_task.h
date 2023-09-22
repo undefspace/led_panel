@@ -8,7 +8,8 @@ typedef enum {
     rt_notif_wifi_status,
     rt_notif_weather,
     rt_notif_door_ring,
-    rt_notif_brightness
+    rt_notif_brightness,
+    rt_notif_fft,
 } render_task_notification_type_t;
 
 typedef struct {
@@ -20,6 +21,7 @@ typedef struct {
             int8_t temperature;
             uint8_t sun, cloud, rain, thunder, snow;
         } weather;
+        float* fft_buffer;
     } u;
 } render_task_notification_t;
 
