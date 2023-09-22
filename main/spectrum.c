@@ -2,9 +2,12 @@
 #include "overall_config.h"
 #include <math.h>
 #include <esp_log.h>
+#include <led_strip.h>
 
 extern float fft_output[FFT_SIZE * 2];
+extern led_strip_t strip;
 float bar_target[PANEL_WIDTH], bar_height[PANEL_WIDTH], bar_vel[PANEL_WIDTH];
+float led_target[PANEL_WIDTH], led_height[PANEL_WIDTH], led_vel[PANEL_WIDTH];
 
 uint32_t angle_to_color(float angle) {
     float r = 0, g = 0, b = 0;
@@ -55,4 +58,15 @@ void spectrum_draw(Olivec_Canvas canvas) {
             i, SPECTRUM_HEIGHT - 1 - (bar_height[i] * (SPECTRUM_HEIGHT - 1)),
             angle_to_color((float)i / (float)PANEL_WIDTH));
     }
+
+    for(int i = 0; i < STRIP_WIDTH; i++) {
+        uint32_t color = 0;
+        if(i >= 0 && i < STRIP_WIDTH / 5) color = 0x00ffff;
+        if(i >= 1 * STRIP_WIDTH / 5 && i < 2 * STRIP_WIDTH / 5) color = 0xff00ff;
+        if(i >= 2 * STRIP_WIDTH / 5 && i < 3 * STRIP_WIDTH / 5) color = 0xffffff;
+        if(i >= 3 * STRIP_WIDTH / 5 && i < 4 * STRIP_WIDTH / 5) color = 0xff00ff;
+        if(i >= 4 * STRIP_WIDTH / 5 && i < 5 * STRIP_WIDTH / 5) color = 0x00ffff;
+        led_strip_set_pixel(&strip, i, rgb_from_code(color));
+    }
+    led_strip_flush(&strip);
 }

@@ -16,9 +16,13 @@
 #include <esp_adc/adc_cali.h>
 #include <esp_adc/adc_cali_scheme.h>
 #include <stdlib.h>
+#include <led_strip.h>
+#include <driver/rmt.h>
 
 #define min(a, b) (a <= b ? a : b)
 #define max(a, b) (a >= b ? a : b)
+
+led_strip_t strip;
 
 // declarations
 void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
@@ -87,7 +91,14 @@ void app_main(void) {
     // xTaskCreate(brightness_task,    "brightness", 2048, NULL, 10, NULL);
 
     // set up strip
-    // FastLED.addLeds<WS2812B, STRIP_PIN_D>(strip, STRIP_WIDTH);
+    strip.type = LED_STRIP_WS2812;
+    strip.is_rgbw = false;
+    strip.brightness = 255;
+    strip.length = STRIP_WIDTH;
+    strip.gpio = 21;
+    strip.channel = RMT_CHANNEL_0;
+    led_strip_install();
+    led_strip_init(&strip);
 }
 
 void brightness_task(void* ignored) {
