@@ -31,7 +31,8 @@
         "decimal_clock.h": "c",
         "hex_clock.h": "c",
         "weather.h": "c",
-        "big_clock.h": "c"
+        "big_clock.h": "c",
+        "led_strip.h": "c"
     },
     "idf.flashBaudRate": "1500000"
 }

@@ -14,7 +14,7 @@
 
 // LED strip
 #define STRIP_PIN_D 21
-#define STRIP_WIDTH 240
+#define STRIP_WIDTH 300
 
 // spectrum
 #define FFT_SIZE               512

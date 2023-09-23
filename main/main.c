@@ -5,6 +5,7 @@
 #include "tasks/render.h"
 #include "tasks/weather_fetch.h"
 #include "tasks/fft.h"
+#include "tasks/led.h"
 #include <esp_wifi.h>
 #include <esp_log.h>
 #include <leddisplay.h>
@@ -16,13 +17,9 @@
 #include <esp_adc/adc_cali.h>
 #include <esp_adc/adc_cali_scheme.h>
 #include <stdlib.h>
-#include <led_strip.h>
-#include <driver/rmt.h>
 
 #define min(a, b) (a <= b ? a : b)
 #define max(a, b) (a >= b ? a : b)
-
-led_strip_t strip;
 
 // declarations
 void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
@@ -85,20 +82,11 @@ void app_main(void) {
     ESP_ERROR_CHECK(leddisplay_init());
 
     // create tasks
-    xTaskCreate(render_task,        "renderer", 4096, NULL, 10, NULL);
-    xTaskCreate(weather_fetch_task, "weather", 8192, NULL, 10, NULL);
-    xTaskCreate(fft_task,           "fft", 4096, NULL, 10, NULL);
+    xTaskCreate(render_task,          "renderer", 4096, NULL, 10, NULL);
+    xTaskCreate(weather_fetch_task,   "weather", 8192, NULL, 10, NULL);
+    xTaskCreate(fft_task,             "fft", 4096, NULL, 10, NULL);
+    xTaskCreatePinnedToCore(led_task, "led", 2048, NULL, configMAX_PRIORITIES - 1, NULL, 1);
     // xTaskCreate(brightness_task,    "brightness", 2048, NULL, 10, NULL);
-
-    // set up strip
-    strip.type = LED_STRIP_WS2812;
-    strip.is_rgbw = false;
-    strip.brightness = 255;
-    strip.length = STRIP_WIDTH;
-    strip.gpio = 21;
-    strip.channel = RMT_CHANNEL_0;
-    led_strip_install();
-    led_strip_init(&strip);
 }
 
 void brightness_task(void* ignored) {
