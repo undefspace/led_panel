@@ -1,9 +1,11 @@
 #include "elements/weather.h"
 #include <stdio.h>
 #include "fonts/big_clock.h"
+#include "fonts/small_clock.h"
 #include <esp_timer.h>
 
-uint16_t weather_status = 1;
+float weather_temp = 99.9f;
+uint8_t weather_status = 1;
 
 void _weather_draw_sun(Olivec_Canvas canvas) {
     olivec_circle(canvas, 5, 5, 2, WEATHER_SUN);
@@ -71,7 +73,6 @@ void weather_draw(Olivec_Canvas canvas) {
     int cloud = weather_status & 2;
     int rain = weather_status & 4;
     int thunder = weather_status & 8;
-    int8_t temp = weather_status >> 8;
 
     // draw icons
     if(sun) {
@@ -91,8 +92,13 @@ void weather_draw(Olivec_Canvas canvas) {
         _weather_draw_thunder(thunder);
     }
 
-    // draw text
-    char buf[6];
-    sprintf(buf, "%c%02dC", temp >= 0 ? '+' : '-', abs(temp));
+    // draw main text
+    char buf[16];
+    sprintf(buf, "%c%02dC", weather_temp >= 0 ? '+' : '-', abs((int)weather_temp));
     olivec_text(canvas, buf, 14, 0, big_clock, WEATHER_TEXT);
+
+    // draw tenths
+    int tenths = (int)(weather_temp * 10) % 10;
+    sprintf(buf, "%d", tenths);
+    olivec_text(canvas, buf, 49, 9, small_clock, WEATHER_TEXT);
 }

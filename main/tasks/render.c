@@ -40,7 +40,8 @@ void _render_task_process_notifications(void) {
                 ESP_LOGI(TAG, "rt_notif_weather: sun=%d, cloud=%d, rain=%d, thunder=%d, snow=%d, temperature=%d",
                     wp.sun, wp.cloud, wp.rain, wp.thunder, wp.snow, wp.temperature);
                 weather_status = (wp.sun) | (wp.cloud << 1) | (wp.rain << 2) | (wp.thunder << 3)
-                    | (wp.snow << 4) | (wp.temperature << 8);
+                    | (wp.snow << 4) | (wp.mist << 5);
+                weather_temp = wp.temperature;
                 #undef wp
                 break;
             // door ring

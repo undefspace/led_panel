@@ -12,4 +12,4 @@ idf_component_register(SRCS "elements/spectrum.c"
                             "elements/weather.c"
                             "tasks/led.c"
                     INCLUDE_DIRS "include/"
-                    EMBED_TXTFILES "certs/isrg_root_x1.pem")
+                    EMBED_TXTFILES "certs/usertrust_rsa_ca.pem")

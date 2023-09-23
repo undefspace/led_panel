@@ -18,8 +18,8 @@ typedef struct {
         uint8_t wifi_connected;
         uint8_t brightness;
         struct {
-            int8_t temperature;
-            uint8_t sun, cloud, rain, thunder, snow;
+            float temperature;
+            uint8_t sun, cloud, rain, thunder, snow, mist;
         } weather;
         float* fft_buffer;
     } u;

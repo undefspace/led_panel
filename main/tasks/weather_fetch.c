@@ -9,7 +9,7 @@
 
 #define TAG "weather_fetch_task"
 
-extern const char root_cert[] asm("_binary_isrg_root_x1_pem_start");
+extern const char root_cert[] asm("_binary_usertrust_rsa_ca_pem_start");
 
 esp_err_t _weather_http_event_handler(esp_http_client_event_t *evt) {
     static int output_len;
@@ -26,9 +26,9 @@ void weather_fetch_task(void* _ignored) {
     // configure HTTP client
     char json[4096] = {0};
     const esp_http_client_config_t config = {
-        .host = "wttr.in",
-        .path = "/"WEATHER_LOCATION,
-        .query = "format=j2",
+        .host = "api.openweathermap.org",
+        .path = "/data/2.5/weather",
+        .query = "q="WEATHER_LOCATION"&appid="WEATHER_KEY"&units=metric",
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
         .cert_pem = root_cert,
         .cert_len = 0, // null-terminated
@@ -54,70 +54,51 @@ void weather_fetch_task(void* _ignored) {
         }
 
         // parse JSON
+        int icon_id;
+        char time_of_day;
         cJSON* root = cJSON_Parse(json);
-        cJSON* condidtions = cJSON_GetObjectItem(root, "current_condition");
-        cJSON* condition = cJSON_GetArrayItem(condidtions, 0);
-        char* temp_str = cJSON_GetStringValue(cJSON_GetObjectItem(condition,
-            WEATHER_USE_FEELS_LIKE ? "FeelsLikeC" : "temp_C"));
-        char* condition_code_str = cJSON_GetStringValue(cJSON_GetObjectItem(condition, "weatherCode"));
-        int8_t temp = atoi(temp_str);
-        uint16_t condition_code = atoi(condition_code_str);
+        cJSON* weather_list = cJSON_GetObjectItem(root, "weather");
+        cJSON* weather = cJSON_GetArrayItem(weather_list, 0);
+        cJSON* main = cJSON_GetObjectItem(root, "main");
+        float temp = cJSON_GetNumberValue(cJSON_GetObjectItem(main, WEATHER_USE_FEELS_LIKE ? "feels_like" : "temp"));
+        sscanf(cJSON_GetStringValue(cJSON_GetObjectItem(weather, "icon")), "%02d%c", &icon_id, &time_of_day);
 
-        // transform condition codes
+        // transform icon codes
         render_task_notification_t notification = {
             .type = rt_notif_weather,
             .u.weather.temperature = temp,
         };
         #define wp notification.u.weather
-        switch(condition_code) {
-            case 113: // sunny
+        switch(icon_id) {
+            case 1:
                 wp.sun = 1;
                 break;
-            case 116: // partly cloudy
-            case 119: // cloudy
+            case 2:
                 wp.sun = 1;
                 wp.cloud = 1;
                 break;
-            case 122: // overcast
-            case 143: // mist
-            case 248: // fog
-            case 260: // freezing fog
+            case 3:
+            case 4:
                 wp.cloud = 1;
                 break;
-            case 176: // patchy rain
-            case 185: // patchy freezing drizzle
-            case 263: // patchy light drizzle
-            case 266: // light drizzle
-            case 281: // freezing drizzle
-            case 293: // patchy light rain
-            case 296: // light rain
-            case 299: // moderate rain at times
-            case 311: // light freezing rain
+            case 9:
+                wp.cloud = 1;
+                wp.rain = 1;
+                break;
+            case 10:
                 wp.sun = 1;
                 wp.cloud = 1;
                 wp.rain = 1;
                 break;
-            case 284: // heavy freezing drizzle
-            case 302: // moderate rain
-            case 305: // heavy rain at times
-            case 308: // heavy rain
-                wp.cloud = 1;
-                wp.rain = 1;
-                break;
-            case 179: // patchy snow
-            case 182: // patchy sleet
-                wp.cloud = 1;
-                wp.snow = 1;
-                break;
-            case 200: // thundery outbreaks
-                wp.sun = 1;
+            case 11:
                 wp.cloud = 1;
                 wp.thunder = 1;
                 break;
-            case 227: // blowing snow
-            case 230: // blizzard
-                wp.cloud = 1;
+            case 13:
                 wp.snow = 1;
+                break;
+            case 50:
+                wp.mist = 1;
                 break;
         }
         #undef wp

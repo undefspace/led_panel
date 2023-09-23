@@ -15,4 +15,5 @@ static const ui_element_t weather = {
     .width = 58, .height = 17,
     .draw = weather_draw
 };
-extern uint16_t weather_status;
+extern uint8_t weather_status;
+extern float weather_temp;

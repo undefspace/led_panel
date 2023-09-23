@@ -22,7 +22,7 @@
 
 // misc
 #define RENDER_QUEUE_LEN       16
-#define WEATHER_LOCATION       "Moscow"
+#define WEATHER_LOCATION       "Moscow,RU"
 #define WEATHER_USE_FEELS_LIKE true
 
 // credentials
