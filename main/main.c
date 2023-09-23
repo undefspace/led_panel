@@ -27,9 +27,8 @@ void app_main(void);
 void brightness_task(void* ignored);
 
 void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
-    if(event_base == WIFI_EVENT)
-        if(event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED)
-            esp_wifi_connect();
+    if(event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED))
+        esp_wifi_connect();
 
     if((event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) ||
        (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)) {
@@ -45,8 +44,8 @@ void app_main(void) {
     // initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
 
@@ -82,9 +81,9 @@ void app_main(void) {
     ESP_ERROR_CHECK(leddisplay_init());
 
     // create tasks
-    xTaskCreate(render_task,          "renderer", 4096, NULL, 10, NULL);
-    xTaskCreate(weather_fetch_task,   "weather", 8192, NULL, 10, NULL);
-    xTaskCreate(fft_task,             "fft", 4096, NULL, 10, NULL);
+    xTaskCreate(render_task, "renderer", 4096, NULL, 10, NULL);
+    xTaskCreate(weather_fetch_task, "weather", 8192, NULL, 10, NULL);
+    xTaskCreate(fft_task, "fft", 4096, NULL, 10, NULL);
     xTaskCreatePinnedToCore(led_task, "led", 2048, NULL, configMAX_PRIORITIES - 1, NULL, 1);
     // xTaskCreate(brightness_task,    "brightness", 2048, NULL, 10, NULL);
 }
