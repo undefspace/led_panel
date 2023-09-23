@@ -1,19 +1,52 @@
 #include "elements/weather.h"
 #include <stdio.h>
 #include "fonts/big_clock.h"
+#include <esp_timer.h>
 
 uint16_t weather_status = 1;
 
 void _weather_draw_sun(Olivec_Canvas canvas) {
-    olivec_circle(canvas, 4, 4, 2, WEATHER_SUN);
-    OLIVEC_PIXEL(canvas, 0, 4) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 1, 1) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 1, 7) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 4, 0) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 4, 8) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 7, 1) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 7, 7) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 8, 4) = WEATHER_SUN_RAYS;
+    olivec_circle(canvas, 5, 5, 2, WEATHER_SUN);
+    OLIVEC_PIXEL(canvas, 1, 5) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 2, 2) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 2, 8) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 5, 1) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 5, 9) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 8, 2) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 8, 8) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 9, 5) = WEATHER_SUN_RAYS;
+
+    // moving ray parts
+    uint8_t phase = (esp_timer_get_time() / 300000) % 6;
+    int8_t offs = 0, pos_offs = 0, neg_offs = 0;
+    switch(phase) {
+        case 0:
+        case 1:
+            offs = -1;
+            pos_offs = 0;
+            neg_offs = 1;
+            break;
+        case 3:
+        case 4:
+            offs = 1;
+            pos_offs = 1;
+            neg_offs = 0;
+            break;
+        case 2:
+        case 5:
+            offs = 0;
+            pos_offs = 0;
+            neg_offs = 0;
+            break;
+    }
+    OLIVEC_PIXEL(canvas, 0, 5 - offs) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 1 + pos_offs, 1 + neg_offs) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 1 + neg_offs, 9 - pos_offs) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 5 + offs, 0) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 5 - offs, 10) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 9 - neg_offs, 1 + pos_offs) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 9 - pos_offs, 9 - neg_offs) = WEATHER_SUN_RAYS;
+    OLIVEC_PIXEL(canvas, 10, 5 + offs) = WEATHER_SUN_RAYS;
 }
 
 void _weather_draw_cloud(Olivec_Canvas canvas) {
@@ -42,7 +75,7 @@ void weather_draw(Olivec_Canvas canvas) {
 
     // draw icons
     if(sun) {
-        Olivec_Canvas sun = olivec_subcanvas(canvas, cloud ? 6 : 2, cloud ? 1 : 3, 9, 9);
+        Olivec_Canvas sun = olivec_subcanvas(canvas, cloud ? 5 : 1, cloud ? 0 : 2, 11, 11);
         _weather_draw_sun(sun);
     }
     if(cloud) { 
