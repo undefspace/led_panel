@@ -6,6 +6,7 @@
 #include "tasks/weather_fetch.h"
 #include "tasks/fft.h"
 #include "tasks/led.h"
+#include "tasks/media_server.h"
 #include <esp_wifi.h>
 #include <esp_log.h>
 #include <leddisplay.h>
@@ -32,6 +33,10 @@ void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id
 
     if((event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) ||
        (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)) {
+        if(event_base == IP_EVENT) {
+            ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+            ESP_LOGI("main", "got ip: "IPSTR, IP2STR(&event->ip_info.ip));
+        }
         render_task_notification_t notif = {
             .type = rt_notif_wifi_status,
             .u.wifi_connected = event_base == IP_EVENT
@@ -84,6 +89,7 @@ void app_main(void) {
     xTaskCreate(render_task, "renderer", 4096, NULL, 10, NULL);
     xTaskCreate(weather_fetch_task, "weather", 8192, NULL, 10, NULL);
     xTaskCreate(fft_task, "fft", 4096, NULL, 10, NULL);
+    xTaskCreate(media_server_task, "media_server", 2048, NULL, 10, NULL);
     xTaskCreatePinnedToCore(led_task, "led", 2048, NULL, configMAX_PRIORITIES - 1, NULL, 1);
     // xTaskCreate(brightness_task,    "brightness", 2048, NULL, 10, NULL);
 }

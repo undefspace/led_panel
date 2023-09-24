@@ -99,6 +99,6 @@ void weather_draw(Olivec_Canvas canvas) {
 
     // draw tenths
     int tenths = (int)(weather_temp * 10) % 10;
-    sprintf(buf, "%d", tenths);
+    sprintf(buf, ".%d", tenths);
     olivec_text(canvas, buf, 49, 9, small_clock, WEATHER_TEXT);
 }

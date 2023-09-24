@@ -10,6 +10,7 @@ typedef enum {
     rt_notif_door_ring,
     rt_notif_brightness,
     rt_notif_fft,
+    rt_notif_media_info,
 } render_task_notification_type_t;
 
 typedef struct {
@@ -22,6 +23,14 @@ typedef struct {
             uint8_t sun, cloud, rain, thunder, snow, mist;
         } weather;
         float* fft_buffer;
+        struct {
+            char* track;
+            char* album;
+            char* artist;
+            uint32_t length;
+            bool playing;
+            uint32_t pos;
+        } media_info;
     } u;
 } render_task_notification_t;
 

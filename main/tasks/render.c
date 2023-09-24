@@ -15,6 +15,7 @@
 #include "elements/hex_clock.h"
 #include "elements/weather.h"
 #include "elements/spectrum.h"
+#include "elements/media.h"
 
 #define TAG "render_task"
 
@@ -37,7 +38,7 @@ void _render_task_process_notifications(void) {
             // weather update
             case rt_notif_weather:
                 #define wp notification.u.weather
-                ESP_LOGI(TAG, "rt_notif_weather: sun=%d, cloud=%d, rain=%d, thunder=%d, snow=%d, temperature=%d",
+                ESP_LOGI(TAG, "rt_notif_weather: sun=%d, cloud=%d, rain=%d, thunder=%d, snow=%d, temperature=%02.1fC",
                     wp.sun, wp.cloud, wp.rain, wp.thunder, wp.snow, wp.temperature);
                 weather_status = (wp.sun) | (wp.cloud << 1) | (wp.rain << 2) | (wp.thunder << 3)
                     | (wp.snow << 4) | (wp.mist << 5);
@@ -56,6 +57,27 @@ void _render_task_process_notifications(void) {
             // fft buffer
             case rt_notif_fft:
                 // don't log (too frequent)
+                break;
+            // media info
+            case rt_notif_media_info:
+                #define mp notification.u.media_info
+                // log
+                ESP_LOGI(TAG, "rt_notif_media_info: track=\"%s\", album=\"%s\", artist=\"%s\", length=%ums, playing=%d, pos=%u",
+                    mp.track, mp.album, mp.artist, mp.length, mp.playing, mp.pos);
+                // free previous strings
+                free(mp.track);
+                free(mp.album);
+                free(mp.artist);
+                // set new data
+                media_state = (media_state_t){
+                    .track = mp.track,
+                    .album = mp.album,
+                    .artist = mp.artist,
+                    .length = mp.length,
+                    .playing = mp.playing,
+                    .pos = mp.pos,
+                };
+                #undef mp
                 break;
         }
     }
@@ -81,6 +103,7 @@ void render_task(void* ignored) {
         ui_element_draw(canvas, analog_clock);
         ui_element_draw(canvas, weather);
         ui_element_draw(canvas, spectrum);
+        ui_element_draw(canvas, media);
 
         // darken the screen and draw a Wi-Fi icon if not connected to WiFi yet
         if(!connected_to_wifi) {
