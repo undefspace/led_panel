@@ -3,6 +3,7 @@
 #include <math.h>
 #include <esp_log.h>
 #include <led_strip.h>
+#include "images/rzheniye.h"
 
 extern float fft_output[FFT_SIZE * 2];
 float bar_target[PANEL_WIDTH], bar_height[PANEL_WIDTH], bar_vel[PANEL_WIDTH];
@@ -50,10 +51,16 @@ void spectrum_draw(Olivec_Canvas canvas) {
         }
     }
 
+    olivec_sprite_copy(canvas, 0, 0, spectrum.width, spectrum.height, rzheniye);
     for(int i = 0; i < PANEL_WIDTH; i++) {
+        uint32_t rainbow_color = angle_to_color((float)i / (float)PANEL_WIDTH);
+        olivec_line(canvas,
+            i, 0,
+            i, SPECTRUM_HEIGHT - (bar_height[i] * SPECTRUM_HEIGHT),
+            0xff000000);
         olivec_line(canvas,
             i, SPECTRUM_HEIGHT,
             i, SPECTRUM_HEIGHT - (bar_height[i] * (SPECTRUM_HEIGHT - 1)),
-            angle_to_color((float)i / (float)PANEL_WIDTH));
+            (rainbow_color & 0xffffff) | 0x40000000);
     }
 }
