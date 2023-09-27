@@ -62,6 +62,7 @@ void weather_fetch_task(void* _ignored) {
         cJSON* main = cJSON_GetObjectItem(root, "main");
         float temp = cJSON_GetNumberValue(cJSON_GetObjectItem(main, WEATHER_USE_FEELS_LIKE ? "feels_like" : "temp"));
         sscanf(cJSON_GetStringValue(cJSON_GetObjectItem(weather, "icon")), "%02d%c", &icon_id, &time_of_day);
+        cJSON_Delete(root);
 
         // transform icon codes
         render_task_notification_t notification = {
@@ -107,7 +108,6 @@ void weather_fetch_task(void* _ignored) {
         xQueueSend(render_task_queue, &notification, 0);
 
         // fetch again in 10min
-        esp_http_client_close(client);
         esp_http_client_cleanup(client);
         vTaskDelay(10 * 60 * 1000 / portTICK_PERIOD_MS);
     }

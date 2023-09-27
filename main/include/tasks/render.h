@@ -11,6 +11,7 @@ typedef enum {
     rt_notif_brightness,
     rt_notif_fft,
     rt_notif_media_info,
+    rt_notif_co2_ppm,
 } render_task_notification_type_t;
 
 typedef struct {
@@ -31,6 +32,7 @@ typedef struct {
             bool playing;
             uint32_t pos;
         } media_info;
+        int co2_ppm;
     } u;
 } render_task_notification_t;
 

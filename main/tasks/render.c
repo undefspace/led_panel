@@ -6,6 +6,7 @@
 #include "fonts/big_clock.h"
 #include <leddisplay.h>
 #include <esp_log.h>
+#include <esp_timer.h>
 
 // elements
 #include "ui_element.h"
@@ -14,6 +15,7 @@
 #include "elements/decimal_clock.h"
 #include "elements/hex_clock.h"
 #include "elements/weather.h"
+#include "elements/co2.h"
 #include "elements/spectrum.h"
 #include "elements/media.h"
 
@@ -22,9 +24,18 @@
 // renderer status
 QueueHandle_t render_task_queue;
 uint8_t connected_to_wifi;
+uint8_t brightness = 255;
+uint64_t frame_delta;
+
+// framebuffers
 leddisplay_frame_t leddisplay_frame;
 static uint32_t buffer[PANEL_WIDTH * PANEL_HEIGHT];
-uint8_t brightness = 255;
+uint32_t middle_buffer[PANEL_WIDTH * MIDDLE_CNT * 14];
+
+// middle section (moving elements)
+float middle_section_offs = 0;
+int middle_section_target = 0;
+uint32_t middle_section_latch = 0;
 
 void _render_task_process_notifications(void) { 
     render_task_notification_t notification;
@@ -79,6 +90,11 @@ void _render_task_process_notifications(void) {
                 };
                 #undef mp
                 break;
+            // CO2 ppm
+            case rt_notif_co2_ppm:
+                ESP_LOGI(TAG, "rt_notif_co2_ppm: %d", notification.u.co2_ppm);
+                co2_ppm = notification.u.co2_ppm;
+                break;
         }
     }
 }
@@ -88,22 +104,39 @@ void render_task(void* ignored) {
     render_task_queue = xQueueCreate(RENDER_QUEUE_LEN, sizeof(render_task_notification_t));
 
     while(1) {
+        uint64_t frame_start = esp_timer_get_time();
+
         // process incoming notifications
         _render_task_process_notifications();
 
         // clear buffers
         leddisplay_frame_clear(&leddisplay_frame);
         Olivec_Canvas canvas = olivec_canvas(buffer, PANEL_WIDTH, PANEL_HEIGHT, PANEL_WIDTH);
+        Olivec_Canvas middle_canvas = olivec_canvas(middle_buffer, PANEL_WIDTH * MIDDLE_CNT, 14, PANEL_WIDTH * MIDDLE_CNT);
         olivec_fill(canvas, 0xff000000);
+        olivec_fill(middle_canvas, 0xff000000);
 
         // render persistent elements
         ui_element_draw(canvas, decimal_clock);
         ui_element_draw(canvas, hex_clock);
         ui_element_draw(canvas, binary_clock);
         ui_element_draw(canvas, analog_clock);
-        ui_element_draw(canvas, weather);
         ui_element_draw(canvas, spectrum);
         ui_element_draw(canvas, media);
+
+        // recalculate moving element position
+        if(esp_timer_get_time() - middle_section_latch > (MIDDLE_SECT_HOLD_MS * 1000)) {
+            middle_section_latch = esp_timer_get_time();
+            middle_section_target = (middle_section_target + 64) % (64 * MIDDLE_CNT);
+        }
+        float delta = middle_section_target - middle_section_offs; // the fact that delta keeps getting smaller gives the animation some smoothness
+        float inc = delta * ((float)frame_delta / (MIDDLE_SECT_TRANS_MS * 1000.0f));
+        middle_section_offs += inc;
+
+        // render moving elements
+        ui_element_draw(middle_canvas, weather);
+        ui_element_draw(middle_canvas, co2);
+        olivec_sprite_copy(canvas, -middle_section_offs, 31, middle_canvas.width, middle_canvas.height, middle_canvas);
 
         // darken the screen and draw a Wi-Fi icon if not connected to WiFi yet
         if(!connected_to_wifi) {
@@ -128,5 +161,7 @@ void render_task(void* ignored) {
         
         // yield
         vTaskDelay(10 / portTICK_PERIOD_MS);
+
+        frame_delta = esp_timer_get_time() - frame_start;
     }
 }

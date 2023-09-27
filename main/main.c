@@ -7,6 +7,7 @@
 #include "tasks/fft.h"
 #include "tasks/led.h"
 #include "tasks/media_server.h"
+#include "tasks/hass.h"
 #include <esp_wifi.h>
 #include <esp_log.h>
 #include <leddisplay.h>
@@ -91,7 +92,14 @@ void app_main(void) {
     xTaskCreate(fft_task, "fft", 4096, NULL, 10, NULL);
     xTaskCreate(media_server_task, "media_server", 2048, NULL, 10, NULL);
     xTaskCreatePinnedToCore(led_task, "led", 2048, NULL, configMAX_PRIORITIES - 1, NULL, 1);
+    xTaskCreatePinnedToCore(hass_task, "hass", 4096, NULL, configMAX_PRIORITIES - 1, NULL, 1);
     // xTaskCreate(brightness_task,    "brightness", 2048, NULL, 10, NULL);
+
+    // print heap stats every minute
+    while(1) {
+        heap_caps_print_heap_info(MALLOC_CAP_DEFAULT);
+        vTaskDelay(60000 / portTICK_PERIOD_MS);
+    }
 }
 
 void brightness_task(void* ignored) {

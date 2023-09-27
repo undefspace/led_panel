@@ -16,6 +16,11 @@
 #define STRIP_PIN_D 21
 #define STRIP_WIDTH 300
 
+// moving elements (middle section)
+#define MIDDLE_SECT_HOLD_MS  5000
+#define MIDDLE_SECT_TRANS_MS 300
+#define MIDDLE_CNT           2
+
 // spectrum
 #define FFT_SIZE               512
 #define SPECTRUM_FPS           60

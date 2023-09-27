@@ -504,7 +504,8 @@ OLIVECDEF void olivec_text(Olivec_Canvas oc, const char *text, int tx, int ty, O
         for(int y = 0; y < font.height; y++) {
             for(int x = 0; x < font.width; x++) {
                 uint8_t alpha = font.alpha_image[(y * font.img_stride) + x + image_x];
-                olivec_blend_color_fraction(&OLIVEC_PIXEL(oc, tx + x, ty + y), color, alpha);
+                if(olivec_in_bounds(oc, tx + x, ty + y))
+                    olivec_blend_color_fraction(&OLIVEC_PIXEL(oc, tx + x, ty + y), color, alpha);
             }
         }
         tx += font.stride;

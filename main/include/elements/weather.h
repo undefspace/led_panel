@@ -11,7 +11,7 @@
 
 void weather_draw(Olivec_Canvas canvas);
 static const ui_element_t weather = {
-    .x = 3, .y = 31,
+    .x = 3, .y = 0,
     .width = 58, .height = 17,
     .draw = weather_draw
 };

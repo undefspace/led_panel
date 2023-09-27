@@ -13,5 +13,7 @@ idf_component_register(SRCS "elements/spectrum.c"
                             "tasks/led.c"
                             "tasks/media_server.c"
                             "elements/media.c"
+                            "elements/co2.c"
+                            "tasks/hass.c"
                     INCLUDE_DIRS "include/"
                     EMBED_TXTFILES "certs/usertrust_rsa_ca.pem")

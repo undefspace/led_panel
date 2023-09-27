@@ -4,7 +4,7 @@
 #include "olive.h"
 
 typedef struct {
-    uint8_t x, y, width, height;
+    int x, y, width, height;
     void (*draw)(Olivec_Canvas canvas);
 } ui_element_t;
 

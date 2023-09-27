@@ -7,16 +7,21 @@
 float weather_temp = 99.9f;
 uint8_t weather_status = 1;
 
+void _weather_safe_set_px(Olivec_Canvas canvas, int x, int y, uint32_t color) {
+    if(olivec_in_bounds(canvas, x, y))
+        OLIVEC_PIXEL(canvas, x, y) = color;
+}
+
 void _weather_draw_sun(Olivec_Canvas canvas) {
     olivec_circle(canvas, 5, 5, 2, WEATHER_SUN);
-    OLIVEC_PIXEL(canvas, 1, 5) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 2, 2) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 2, 8) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 5, 1) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 5, 9) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 8, 2) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 8, 8) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 9, 5) = WEATHER_SUN_RAYS;
+    _weather_safe_set_px(canvas, 1, 5, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 2, 2, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 2, 8, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 5, 1, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 5, 9, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 8, 2, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 8, 8, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 9, 5, WEATHER_SUN_RAYS);
 
     // moving ray parts
     uint8_t phase = (esp_timer_get_time() / 300000) % 6;
@@ -41,14 +46,14 @@ void _weather_draw_sun(Olivec_Canvas canvas) {
             neg_offs = 0;
             break;
     }
-    OLIVEC_PIXEL(canvas, 0, 5 - offs) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 1 + pos_offs, 1 + neg_offs) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 1 + neg_offs, 9 - pos_offs) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 5 + offs, 0) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 5 - offs, 10) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 9 - neg_offs, 1 + pos_offs) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 9 - pos_offs, 9 - neg_offs) = WEATHER_SUN_RAYS;
-    OLIVEC_PIXEL(canvas, 10, 5 + offs) = WEATHER_SUN_RAYS;
+    _weather_safe_set_px(canvas, 0, 5 - offs, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 1 + pos_offs, 1 + neg_offs, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 1 + neg_offs, 9 - pos_offs, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 5 + offs, 0, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 5 - offs, 10, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 9 - neg_offs, 1 + pos_offs, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 9 - pos_offs, 9 - neg_offs, WEATHER_SUN_RAYS);
+    _weather_safe_set_px(canvas, 10, 5 + offs, WEATHER_SUN_RAYS);
 }
 
 void _weather_draw_cloud(Olivec_Canvas canvas) {
@@ -100,5 +105,5 @@ void weather_draw(Olivec_Canvas canvas) {
     // draw tenths
     int tenths = (int)(weather_temp * 10) % 10;
     sprintf(buf, ".%d", tenths);
-    olivec_text(canvas, buf, 49, 9, small_clock, WEATHER_TEXT);
+    olivec_text(canvas, buf, 47, 9, small_clock, WEATHER_TEXT);
 }
