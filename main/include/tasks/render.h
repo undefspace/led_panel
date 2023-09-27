@@ -5,13 +5,14 @@
 #include <freertos/queue.h>
 
 typedef enum {
-    rt_notif_wifi_status,
+    rt_notif_wifi_status = 1,
     rt_notif_weather,
     rt_notif_door_ring,
     rt_notif_brightness,
     rt_notif_fft,
     rt_notif_media_info,
     rt_notif_co2_ppm,
+    rt_notif_temp,
 } render_task_notification_type_t;
 
 typedef struct {
@@ -33,6 +34,7 @@ typedef struct {
             uint32_t pos;
         } media_info;
         int co2_ppm;
+        float indoor_temp;
     } u;
 } render_task_notification_t;
 

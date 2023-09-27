@@ -35,7 +35,7 @@ uint32_t middle_buffer[PANEL_WIDTH * MIDDLE_CNT * 14];
 // middle section (moving elements)
 float middle_section_offs = 0;
 int middle_section_target = 0;
-uint32_t middle_section_latch = 0;
+int64_t middle_section_latch = 0;
 
 void _render_task_process_notifications(void) { 
     render_task_notification_t notification;
@@ -94,6 +94,10 @@ void _render_task_process_notifications(void) {
             case rt_notif_co2_ppm:
                 ESP_LOGI(TAG, "rt_notif_co2_ppm: %d", notification.u.co2_ppm);
                 co2_ppm = notification.u.co2_ppm;
+                break;
+            // indoor temp
+            case rt_notif_temp:
+                ESP_LOGI(TAG, "rt_notif_temp: %f", notification.u.indoor_temp);
                 break;
         }
     }
