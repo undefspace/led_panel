@@ -7,6 +7,7 @@
 #include <leddisplay.h>
 #include <esp_log.h>
 #include <esp_timer.h>
+#include <math.h>
 
 // elements
 #include "ui_element.h"
@@ -131,11 +132,13 @@ void render_task(void* ignored) {
         // recalculate moving element position
         if(esp_timer_get_time() - middle_section_latch > (MIDDLE_SECT_HOLD_MS * 1000)) {
             middle_section_latch = esp_timer_get_time();
-            middle_section_target = (middle_section_target + 64) % (64 * MIDDLE_CNT);
+            middle_section_target = (middle_section_target + PANEL_WIDTH) % (PANEL_WIDTH * MIDDLE_CNT);
         }
         float delta = middle_section_target - middle_section_offs; // the fact that delta keeps getting smaller gives the animation some smoothness
         float inc = delta * ((float)frame_delta / (MIDDLE_SECT_TRANS_MS * 1000.0f));
         middle_section_offs += inc;
+        if(fabs(middle_section_offs - middle_section_target) < 1)
+            middle_section_offs = middle_section_target;
 
         // render moving elements
         ui_element_draw(middle_canvas, weather);

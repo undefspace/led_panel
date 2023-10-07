@@ -40,10 +40,10 @@ void co2_draw(Olivec_Canvas canvas) {
         (co2_current > CO2_HI) ? CO2_HI_COLOR :
         ((co2_current > CO2_MED) ? CO2_MED_COLOR :
         CO2_LOW_COLOR);
-    olivec_text(canvas, buf, 4, 0, big_clock, color);
+    olivec_text(canvas, buf, 6, 0, big_clock, color);
 
     // draw blinking exclamation mark triangle on high co2
     bool phase = (esp_timer_get_time() / 500000) % 2;
     if((color == CO2_HI_COLOR) && phase)
-        olivec_text(canvas, "!", 48, 0, big_clock, color);
+        olivec_text(canvas, "!", 50, 0, big_clock, color);
 }

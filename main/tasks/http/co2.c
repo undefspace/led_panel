@@ -61,18 +61,11 @@ render_task_notification_t _co2_response_parse(cJSON* root) {
         if(last_ts == -1)
             last_ts = ts;
 
-        // assign to the appropriate cell
+        // assign to the appropriate cell, also filling in preceding cells,
+        // as some of them are missing
         int mins_back = MIN(MAX((last_ts - ts) / 60, 0), PANEL_WIDTH - 1);
-        ppm_buffer[PANEL_WIDTH - 1 - mins_back] = atoi(cJSON_GetStringValue(cJSON_GetObjectItem(entry, "state")));
-    }
-
-    // fill in the gaps
-    uint16_t ppm_last = ppm_buffer[0];
-    for(int i = 1; i < PANEL_WIDTH; i++) {
-        if(ppm_buffer[i])
-            ppm_last = ppm_buffer[i];
-        else
-            ppm_buffer[i] = ppm_last;
+        for(int j = PANEL_WIDTH - 1 - mins_back; j >= 0; j--)
+            ppm_buffer[j] = atoi(cJSON_GetStringValue(cJSON_GetObjectItem(entry, "state")));
     }
 
     // create notification
