@@ -53,7 +53,7 @@ int _http_perform_request(http_request_def_t req) {
     // perform request
     esp_err_t err = esp_http_client_perform(client);
     if(err == ESP_OK) {
-        ESP_LOGI(TAG, "%s: HTTP GET Status = %d, content_length = %ld",
+        ESP_LOGI(TAG, "%s: HTTP GET Status = %d, content_length = %lld",
                 req.log_tag,
                 esp_http_client_get_status_code(client),
                 esp_http_client_get_content_length(client));
