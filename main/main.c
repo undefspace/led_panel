@@ -19,9 +19,6 @@
 #include <esp_adc/adc_cali_scheme.h>
 #include <stdlib.h>
 
-#define min(a, b) (a <= b ? a : b)
-#define max(a, b) (a >= b ? a : b)
-
 // declarations
 void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 void app_main(void);
@@ -87,70 +84,14 @@ void app_main(void) {
 
     // create tasks
     xTaskCreate(render_task, "renderer", 4096, NULL, 10, NULL);
-    xTaskCreate(http_task, "http", 8192, NULL, 10, NULL);
+    xTaskCreate(http_task, "http", 12288, NULL, 10, NULL);
     xTaskCreate(fft_task, "fft", 4096, NULL, 10, NULL);
     xTaskCreate(media_server_task, "media_server", 2048, NULL, 10, NULL);
     xTaskCreatePinnedToCore(led_task, "led", 2048, NULL, configMAX_PRIORITIES - 1, NULL, 1);
-    // xTaskCreate(brightness_task,    "brightness", 2048, NULL, 10, NULL);
 
     // print heap stats every minute
     while(1) {
         heap_caps_print_heap_info(MALLOC_CAP_DEFAULT);
         vTaskDelay(60000 / portTICK_PERIOD_MS);
-    }
-}
-
-void brightness_task(void* ignored) {
-    int latched_brightness = 100;
-
-    // set up ADC
-    adc_oneshot_unit_handle_t adc1_handle;
-    adc_oneshot_unit_init_cfg_t init_config1 = {
-        .unit_id = ADC_UNIT_1,
-    };
-    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc1_handle));
-    adc_oneshot_chan_cfg_t config = {
-        .bitwidth = ADC_BITWIDTH_12,
-        .atten = ADC_ATTEN_DB_0,
-    };
-    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_5, &config));
-
-    // set up ADC calibration
-    adc_cali_handle_t adc_cali_handle = NULL;
-    adc_cali_line_fitting_config_t cali_config = {
-        .unit_id = ADC_UNIT_1,
-        .atten = config.atten,
-        .bitwidth = config.bitwidth,
-    };
-    ESP_ERROR_CHECK(adc_cali_create_scheme_line_fitting(&cali_config, &adc_cali_handle));
-
-    while(1) {
-        // read ADC
-        int adc_raw_total, adc_millivolts;
-        for(int i = 0; i < 10; i++) {
-            int adc_raw;
-            ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC_CHANNEL_5, &adc_raw));
-            adc_raw_total += adc_raw;
-        }
-        adc_raw_total /= 10;
-        ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc_cali_handle, adc_raw_total, &adc_millivolts));
-
-        // calculate brightness
-        int lux = adc_millivolts / 5;
-        int brightness = min(max(lux * 4, 10), 255);
-
-        // latch brightness
-        if(abs(brightness - latched_brightness) > 30) {
-            latched_brightness = brightness;
-            // send notification to renderer
-            render_task_notification_t notif = {
-                .type = rt_notif_brightness,
-                .u.brightness = brightness
-            };
-            xQueueSend(render_task_queue, &notif, 0);
-        }
-
-        // repeat after 100ms
-        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }

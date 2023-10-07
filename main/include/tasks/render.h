@@ -33,7 +33,7 @@ typedef struct {
             bool playing;
             uint32_t pos;
         } media_info;
-        int co2_ppm;
+        uint16_t* ppm_buffer;
         float indoor_temp;
     } u;
 } render_task_notification_t;

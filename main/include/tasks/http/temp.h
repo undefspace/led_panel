@@ -10,5 +10,6 @@ static const http_request_def_t temp_request = {
     .url = "http://undef:8123/api/states/sensor.temperature",
     .auth = "bearer "HASS_KEY,
     .use_tls = false,
+    .prepare_url = NULL,
     .parse_response = _temp_response_parse,
 };

@@ -10,5 +10,6 @@ static const http_request_def_t weather_request = {
     .url = "https://api.openweathermap.org/data/2.5/weather?q="WEATHER_LOCATION"&appid="WEATHER_KEY"&units=metric",
     .auth = NULL,
     .use_tls = true,
+    .prepare_url = NULL,
     .parse_response = _weather_response_parse,
 };

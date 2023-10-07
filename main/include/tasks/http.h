@@ -13,6 +13,7 @@ typedef struct {
     const char* auth;
     bool use_tls;
     render_task_notification_t (*parse_response)(cJSON* root);
+    void (*prepare_url)(char* buf, const char* template);
 } http_request_def_t;
 
 void http_task(void*);

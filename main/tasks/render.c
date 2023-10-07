@@ -92,8 +92,8 @@ void _render_task_process_notifications(void) {
                 break;
             // CO2 ppm
             case rt_notif_co2_ppm:
-                ESP_LOGI(TAG, "rt_notif_co2_ppm: %d", notification.u.co2_ppm);
-                co2_ppm = notification.u.co2_ppm;
+                ESP_LOGI(TAG, "rt_notif_co2_ppm");
+                co2_ppm_buf = notification.u.ppm_buffer;
                 break;
             // indoor temp
             case rt_notif_temp:

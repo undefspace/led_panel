@@ -279,14 +279,18 @@ OLIVECDEF void olivec_line_aa(Olivec_Canvas oc, float x0, float y0, float x1, fl
     // main loop
     if(steep) {
         for(float x = x0; x <= x1; x++) {
-            olivec_blend_color_fraction(&OLIVEC_PIXEL(oc, (int)y0, (int)x), color, FRAC(y0));
-            olivec_blend_color_fraction(&OLIVEC_PIXEL(oc, (int)y0 - 1, (int)x), color, 255 - FRAC(y0));
+            if(olivec_in_bounds(oc, y0, x))
+                olivec_blend_color_fraction(&OLIVEC_PIXEL(oc, (int)y0, (int)x), color, FRAC(y0));
+            if(olivec_in_bounds(oc, y0 - 1, x))
+                olivec_blend_color_fraction(&OLIVEC_PIXEL(oc, (int)y0 - 1, (int)x), color, 255 - FRAC(y0));
             y0 += gradient;
         }
     } else {
         for (float x = x0; x <= x1; x++){
-            olivec_blend_color_fraction(&OLIVEC_PIXEL(oc, (int)x, (int)y0), color, FRAC(y0));
-            olivec_blend_color_fraction(&OLIVEC_PIXEL(oc, (int)x, (int)y0 - 1), color, 255 - FRAC(y0));
+            if(olivec_in_bounds(oc, x, y0))
+                olivec_blend_color_fraction(&OLIVEC_PIXEL(oc, (int)x, (int)y0), color, FRAC(y0));
+            if(olivec_in_bounds(oc, x, y0 - 1))
+                olivec_blend_color_fraction(&OLIVEC_PIXEL(oc, (int)x, (int)y0 - 1), color, 255 - FRAC(y0));
             y0 += gradient;
         }
     }
