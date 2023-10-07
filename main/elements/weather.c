@@ -63,8 +63,11 @@ void _weather_draw_cloud(Olivec_Canvas canvas) {
 }
 
 void _weather_draw_rain(Olivec_Canvas canvas) {
-    for(int i = 0; i < 3; i++)
-        olivec_line(canvas, i * 3, 2, 2 + (i * 3), 0, WEATHER_RAIN);
+    uint8_t phase = (esp_timer_get_time() / 100000) % 10;
+
+    for(int y = 0; y < 3; y++)
+        for(int x = 0; x < 3; x++)
+            _weather_safe_set_px(canvas, y * 3 + x, 2 - x, WEATHER_RAIN((phase + x - y) % 10));
 }
 
 void _weather_draw_thunder(Olivec_Canvas canvas) {
