@@ -26,8 +26,8 @@
 #define SPECTRUM_FPS           60
 
 // misc
-#define RENDER_QUEUE_LEN       16
-#define WEATHER_LOCATION       "Moscow,RU"
+#define RENDER_QUEUE_LEN       8
+#define WEATHER_LOCATION       "Taganskiy,Moscow,RU"
 #define WEATHER_USE_FEELS_LIKE true
 
 // credentials
