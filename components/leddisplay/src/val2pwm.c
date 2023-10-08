@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 #include <sdkconfig.h>
+#include <esp_attr.h>
 
 #include "val2pwm.h"
 
@@ -65,7 +66,7 @@ uint8_t valToPwm(int val) {
 #if CONFIG_LEDDISPLAY_CORR_BRIGHT_STRICT || CONFIG_LEDDISPLAY_CORR_BRIGHT_MODIFIED
 
 // from above, see also https://github.com/TrippyLighting/HPRGB2
-static const uint8_t sLumLut[256] =
+const DRAM_ATTR uint8_t sLumLut[256] =
 {
 #  if CONFIG_LEDDISPLAY_CORR_BRIGHT_STRICT // original curve
      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1,
@@ -105,10 +106,5 @@ static const uint8_t sLumLut[256] =
 #    error Hmm...
 #  endif
 };
-
-inline uint8_t val2pwm(const uint8_t val)
-{
-    return sLumLut[val];
-}
 
 #endif // CONFIG_LEDDISPLAY_CORR_BRIGHT_STRICT || CONFIG_LEDDISPLAY_CORR_BRIGHT_MODIFIED

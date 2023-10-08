@@ -153,10 +153,9 @@ void render_task(void* ignored) {
         for(uint8_t y = 0; y < PANEL_HEIGHT; y++) {
             for(uint8_t x = 0; x < PANEL_WIDTH; x++) {
                 uint32_t rgb = buffer[(y * PANEL_WIDTH) + x];
-                uint8_t r = rgb >> 16;
-                uint8_t g = rgb >> 8;
-                uint8_t b = rgb;
-                leddisplay_frame_xy_rgb(&leddisplay_frame, x, y, r, g, b);
+                leddisplay_frame.yx[y][x][0] = rgb >> 16;
+                leddisplay_frame.yx[y][x][1] = rgb >> 8;
+                leddisplay_frame.yx[y][x][2] = rgb;
             }
         }
         leddisplay_frame_update(&leddisplay_frame);
@@ -165,5 +164,6 @@ void render_task(void* ignored) {
         vTaskDelay(10 / portTICK_PERIOD_MS);
 
         frame_delta = esp_timer_get_time() - frame_start;
+        // ESP_LOGI(TAG, "delta=%lldus, fps=%.1f", frame_delta, 1000000.0f / frame_delta);
     }
 }

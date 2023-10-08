@@ -85,7 +85,7 @@ void app_main(void) {
 
     // create tasks
     xTaskCreate(render_task, "renderer", 4096, NULL, 10, NULL);
-    xTaskCreate(http_task, "http", 12288, NULL, 10, NULL);
+    xTaskCreate(http_task, "http", 10240, NULL, 10, NULL);
     xTaskCreate(fft_task, "fft", 4096, NULL, 10, NULL);
     xTaskCreate(media_server_task, "media_server", 2048, NULL, 10, NULL);
     xTaskCreate(ir_task, "ir", 4096, NULL, 10, NULL);

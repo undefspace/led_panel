@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 
-// converts an 0-255 intensity value to an equivalent  0-255 LED PWM value
-uint8_t val2pwm(const uint8_t val);
+extern const uint8_t sLumLut[256];
+
+#define val2pwm(v) sLumLut[v]
 
 #endif // __VAL2PWM_H__

@@ -54,7 +54,7 @@ fft_config_t *fft_init(int size, fft_type_t type, fft_direction_t direction, flo
    */
   int k,m;
 
-  fft_config_t *config = (fft_config_t *)malloc(sizeof(fft_config_t));
+  fft_config_t *config = (fft_config_t *)calloc(1, sizeof(fft_config_t));
 
   // Check if the size is a power of two
   if ((size & (size-1)) != 0)  // tests if size is a power of two

@@ -13,7 +13,7 @@
 #include <sys/param.h>
 
 #define TAG "http_task"
-#define HTTP_JSON_SZ 8192
+#define HTTP_JSON_SZ 6144
 
 extern const char root_cert[] asm("_binary_usertrust_rsa_ca_pem_start");
 
