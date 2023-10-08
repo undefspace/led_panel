@@ -20,12 +20,17 @@
 #include "elements/spectrum.h"
 #include "elements/media.h"
 
+// images
+#include "images/snowflake.h"
+
 #define TAG "render_task"
 
 // renderer status
 QueueHandle_t render_task_queue;
 uint8_t connected_to_wifi;
 uint64_t frame_delta;
+uint8_t currently_snowing;
+render_snowflake_t snowflakes[SNOWFLAKE_CNT];
 
 // framebuffers
 leddisplay_frame_t leddisplay_frame;
@@ -54,6 +59,7 @@ void _render_task_process_notifications(void) {
                 weather_status = (wp.sun) | (wp.cloud << 1) | (wp.rain << 2) | (wp.thunder << 3)
                     | (wp.snow << 4) | (wp.mist << 5);
                 weather_temp = wp.temperature;
+                currently_snowing = wp.snow;
                 #undef wp
                 break;
             // door ring
@@ -102,9 +108,30 @@ void _render_task_process_notifications(void) {
     }
 }
 
+void render_snowflake(Olivec_Canvas canvas, render_snowflake_t* sf) {
+    float x_offs = 7.0f * sf->mass * sin(sf->phase + ((float)(esp_timer_get_time() / 10000ll) / 50.0f));
+    olivec_image_draw(canvas, sf->x + x_offs, sf->y, snowflake, sf->alpha);
+
+    sf->y += sf->mass * 10.0f * ((float)frame_delta / 1000000.0f);
+    if(sf->y >= PANEL_HEIGHT + snowflake.height)
+        render_snowflake_new(sf);
+}
+
+void render_snowflake_new(render_snowflake_t* sf) {
+    sf->mass = 0.5f + (0.5f * ((float)rand() / RAND_MAX));
+    sf->phase = M_TWOPI * (float)rand() / RAND_MAX;
+    sf->x = (int64_t)PANEL_WIDTH * (int64_t)rand() / (int64_t)RAND_MAX;
+    sf->y = -(int)snowflake.height;
+    sf->alpha = rand() & 0xff;
+}
+
 void render_task(void* ignored) {
     // create queue
     render_task_queue = xQueueCreate(RENDER_QUEUE_LEN, sizeof(render_task_notification_t));
+
+    // create initial snowflakes
+    for(int i = 0; i < SNOWFLAKE_CNT; i++)
+        render_snowflake_new(snowflakes + i);
 
     while(1) {
         uint64_t frame_start = esp_timer_get_time();
@@ -142,6 +169,11 @@ void render_task(void* ignored) {
         ui_element_draw(middle_canvas, weather);
         ui_element_draw(middle_canvas, co2);
         olivec_sprite_copy(canvas, -middle_section_offs, 31, middle_canvas.width, middle_canvas.height, middle_canvas);
+
+        // render snowflakes
+        if(currently_snowing)
+            for(int i = 0; i < SNOWFLAKE_CNT; i++)
+                render_snowflake(canvas, snowflakes + i);
 
         // darken the screen and draw a Wi-Fi icon if not connected to WiFi yet
         if(!connected_to_wifi) {

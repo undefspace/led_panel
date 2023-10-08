@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
+#include <olive.h>
 
 typedef enum {
     rt_notif_wifi_status = 1,
@@ -39,6 +40,14 @@ typedef struct {
     } u;
 } render_task_notification_t;
 
+typedef struct {
+    float x, y;
+    float mass, phase;
+    uint8_t alpha;
+} render_snowflake_t;
+
 extern QueueHandle_t render_task_queue;
 
+void render_snowflake(Olivec_Canvas canvas, render_snowflake_t* sf);
+void render_snowflake_new(render_snowflake_t* sf);
 void render_task(void* buffer);

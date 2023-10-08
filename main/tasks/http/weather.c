@@ -41,6 +41,7 @@ render_task_notification_t _weather_response_parse(cJSON* root) {
             wp.thunder = 1;
             break;
         case 13:
+            wp.cloud = 1;
             wp.snow = 1;
             break;
         case 50:

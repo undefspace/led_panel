@@ -30,6 +30,7 @@
 #define WEATHER_LOCATION       "Taganskiy,Moscow,RU"
 #define WEATHER_USE_FEELS_LIKE true
 #define IR_RX_GPIO_NUM         33
+#define SNOWFLAKE_CNT          4
 
 // credentials
 #include "wifi_creds.h"

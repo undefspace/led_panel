@@ -537,6 +537,17 @@ OLIVECDEF void olivec_sprite_blend(Olivec_Canvas oc, int x, int y, int w, int h,
     }
 }
 
+OLIVECDEF void olivec_image_draw(Olivec_Canvas oc, int ox, int oy, Olivec_Canvas image, uint8_t alpha)
+{
+    if (image.width == 0) return;
+    if (image.height == 0) return;
+
+    for (int y = 0; y < image.width; y++)
+        for (int x = 0; x < image.height; x++)
+            if(olivec_in_bounds(oc, x + ox, y+ oy))
+                olivec_blend_color_fraction(&OLIVEC_PIXEL(oc, x + ox, y + oy), OLIVEC_PIXEL(image, x, y), alpha);
+}
+
 OLIVECDEF void olivec_sprite_copy(Olivec_Canvas oc, int x, int y, int w, int h, Olivec_Canvas sprite)
 {
     if (sprite.width == 0) return;
