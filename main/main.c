@@ -7,6 +7,7 @@
 #include "tasks/fft.h"
 #include "tasks/led.h"
 #include "tasks/media_server.h"
+#include "tasks/ir.h"
 #include <esp_wifi.h>
 #include <esp_log.h>
 #include <leddisplay.h>
@@ -87,7 +88,9 @@ void app_main(void) {
     xTaskCreate(http_task, "http", 12288, NULL, 10, NULL);
     xTaskCreate(fft_task, "fft", 4096, NULL, 10, NULL);
     xTaskCreate(media_server_task, "media_server", 2048, NULL, 10, NULL);
-    xTaskCreatePinnedToCore(led_task, "led", 2048, NULL, configMAX_PRIORITIES - 1, NULL, 1);
+    xTaskCreate(ir_task, "ir", 4096, NULL, 10, NULL);
+    // xTaskCreatePinnedToCore(led_task, "led", 2048, NULL, configMAX_PRIORITIES - 1, NULL, 1);
+    // TODO: make the LED controller use the new RMT driver
 
     // print heap stats every minute
     while(1) {

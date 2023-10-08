@@ -25,7 +25,6 @@
 // renderer status
 QueueHandle_t render_task_queue;
 uint8_t connected_to_wifi;
-uint8_t brightness = 255;
 uint64_t frame_delta;
 
 // framebuffers
@@ -61,11 +60,6 @@ void _render_task_process_notifications(void) {
             case rt_notif_door_ring:
                 ESP_LOGI(TAG, "rt_notif_door_ring");
                 break;
-            // brightness
-            case rt_notif_brightness:
-                ESP_LOGI(TAG, "rt_notif_brightness: %d", notification.u.brightness);
-                brightness = notification.u.brightness;
-                break;
             // fft buffer
             case rt_notif_fft:
                 // don't log (too frequent)
@@ -99,6 +93,10 @@ void _render_task_process_notifications(void) {
             // indoor temp
             case rt_notif_temp:
                 ESP_LOGI(TAG, "rt_notif_temp: %f", notification.u.indoor_temp);
+                break;
+            // IR button
+            case rt_notif_ir:
+                ESP_LOGI(TAG, "rt_notif_ir: %s", ir_button_t_to_str(notification.u.ir_button));
                 break;
         }
     }
@@ -150,9 +148,6 @@ void render_task(void* ignored) {
             olivec_rect(canvas, 0, 0, PANEL_WIDTH, PANEL_HEIGHT, 0xd0000000);
             olivec_text(canvas, "W", 27, 25, big_clock, 0xffffffff);
         }
-
-        // apply brightness
-        olivec_rect(canvas, 0, 0, PANEL_WIDTH, PANEL_HEIGHT, (255 - brightness) << 24);
         
         // update display
         for(uint8_t y = 0; y < PANEL_HEIGHT; y++) {

@@ -17,5 +17,6 @@ idf_component_register(SRCS "elements/spectrum.c"
                             "tasks/http/co2.c"
                             "tasks/http/temp.c"
                             "tasks/http/weather.c"
+                            "tasks/ir.c"
                     INCLUDE_DIRS "include/"
                     EMBED_TXTFILES "certs/usertrust_rsa_ca.pem")

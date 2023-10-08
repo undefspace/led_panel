@@ -29,6 +29,7 @@
 #define RENDER_QUEUE_LEN       8
 #define WEATHER_LOCATION       "Taganskiy,Moscow,RU"
 #define WEATHER_USE_FEELS_LIKE true
+#define IR_RX_GPIO_NUM         33
 
 // credentials
 #include "wifi_creds.h"

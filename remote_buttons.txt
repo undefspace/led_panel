@@ -1,0 +1,7 @@
+ba b9 b8   CH-  CH   CH+
+bb bf bc   |<<  >>|  |>||
+f8 ea f6   -    +    EQ
+e9 e6 f2   0    100+ 200+
+f3 e7 a1   1    2    3
+f7 e3 a5   4    5    6
+bd ad b5   7    8    9
