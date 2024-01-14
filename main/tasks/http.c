@@ -9,17 +9,21 @@
 #include "tasks/http/co2.h"
 #include "tasks/http/temp.h"
 #include "tasks/http/weather.h"
+#include "tasks/http/media.h"
+#include "esp_heap_trace.h"
 #include <esp_timer.h>
 #include <sys/param.h>
 
 #define TAG "http_task"
-#define HTTP_JSON_SZ 6144
+#define HTTP_JSON_SZ 5000
 
 extern const char root_cert[] asm("_binary_usertrust_rsa_ca_pem_start");
+extern const char chain_cert[] asm("_binary_openweathermap_org_chain_pem_start");
 
 http_request_def_t http_defs[] = {
     co2_request,
     weather_request,
+    media_request,
 };
 
 int http_buf_overflow = 0;
@@ -54,7 +58,7 @@ int _http_perform_request(http_request_def_t req) {
         .user_data = json,
     };
     if(req.use_tls) {
-        config.cert_pem = root_cert;
+        config.cert_pem = chain_cert;
         config.cert_len = 0; // null-terminated
         config.transport_type = HTTP_TRANSPORT_OVER_SSL;
     }
@@ -67,6 +71,7 @@ int _http_perform_request(http_request_def_t req) {
     // perform request
     http_buf_overflow = 0;
     esp_err_t err = esp_http_client_perform(client);
+    // heap_trace_dump();
     if(http_buf_overflow) {
         ESP_LOGE(TAG, "%s: HTTP buffer overflow", req.log_tag);
         ESP_ERROR_CHECK(esp_http_client_cleanup(client));

@@ -1,8 +1,11 @@
 #include "elements/weather.h"
 #include <stdio.h>
+#include <math.h>
+#include <sys/param.h>
 #include "fonts/big_clock.h"
 #include "fonts/small_clock.h"
 #include <esp_timer.h>
+#include <esp_log.h>
 
 float weather_temp = 99.9f;
 uint8_t weather_status = 1;
@@ -100,13 +103,19 @@ void weather_draw(Olivec_Canvas canvas) {
         _weather_draw_thunder(thunder);
     }
 
+    // select text color
+    uint32_t text_color = WEATHER_TEXT_ZERO;
+    olivec_blend_color_fraction(&text_color,
+        (weather_temp > 0) ? WEATHER_TEXT_HOT : WEATHER_TEXT_COLD,
+        MIN(fabs(weather_temp) * 255.0 / 50.0, 255));
+
     // draw main text
     char buf[16];
     sprintf(buf, "%c%02dC", weather_temp >= 0 ? '+' : '-', abs((int)weather_temp));
-    olivec_text(canvas, buf, 14, 0, big_clock, WEATHER_TEXT);
+    olivec_text(canvas, buf, 14, 0, big_clock, text_color);
 
     // draw tenths
     int tenths = abs((int)(weather_temp * 10) % 10);
     sprintf(buf, ".%d", tenths);
-    olivec_text(canvas, buf, 47, 9, small_clock, WEATHER_TEXT);
+    olivec_text(canvas, buf, 47, 9, small_clock, text_color);
 }

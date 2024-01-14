@@ -77,9 +77,9 @@ void _render_task_process_notifications(void) {
                 ESP_LOGI(TAG, "rt_notif_media_info: track=\"%s\", album=\"%s\", artist=\"%s\", length=%ums, playing=%d, pos=%u",
                     mp.track, mp.album, mp.artist, mp.length, mp.playing, mp.pos);
                 // free previous strings
-                free(mp.track);
-                free(mp.album);
-                free(mp.artist);
+                free(media_state.track);
+                free(media_state.album);
+                free(media_state.artist);
                 // set new data
                 media_state = (media_state_t){
                     .track = mp.track,

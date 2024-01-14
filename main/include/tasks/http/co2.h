@@ -2,6 +2,9 @@
 
 #include "tasks/http.h"
 #include "wifi_creds.h"
+#include <time.h>
+
+time_t timegm(struct tm* tm);
 
 extern render_task_notification_t _co2_response_parse(cJSON* root);
 extern void _co2_url_prepare(char* buf, const char* template);

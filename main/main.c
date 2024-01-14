@@ -6,7 +6,6 @@
 #include "tasks/http.h"
 #include "tasks/fft.h"
 #include "tasks/led.h"
-#include "tasks/media_server.h"
 #include "tasks/ir.h"
 #include <esp_wifi.h>
 #include <esp_log.h>
@@ -19,6 +18,10 @@
 #include <esp_adc/adc_cali.h>
 #include <esp_adc/adc_cali_scheme.h>
 #include <stdlib.h>
+
+#include "esp_heap_trace.h"
+#define NUM_RECORDS 200
+static heap_trace_record_t trace_record[NUM_RECORDS];
 
 // declarations
 void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
@@ -44,6 +47,9 @@ void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id
 }
 
 void app_main(void) {
+    esp_log_level_set("*", ESP_LOG_INFO);
+    ESP_ERROR_CHECK(heap_trace_init_standalone(trace_record, NUM_RECORDS));
+
     // initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -85,16 +91,15 @@ void app_main(void) {
 
     // create tasks
     xTaskCreate(render_task, "renderer", 4096, NULL, 10, NULL);
-    xTaskCreate(http_task, "http", 10240, NULL, 10, NULL);
+    xTaskCreate(http_task, "http", 9240, NULL, 10, NULL);
     xTaskCreate(fft_task, "fft", 4096, NULL, 10, NULL);
-    xTaskCreate(media_server_task, "media_server", 2048, NULL, 10, NULL);
-    xTaskCreate(ir_task, "ir", 4096, NULL, 10, NULL);
-    // xTaskCreatePinnedToCore(led_task, "led", 2048, NULL, configMAX_PRIORITIES - 1, NULL, 1);
+    xTaskCreatePinnedToCore(led_task, "led", 2048, NULL, configMAX_PRIORITIES - 1, NULL, 1);
+    // xTaskCreate(ir_task, "ir", 4096, NULL, 10, NULL);
     // TODO: make the LED controller use the new RMT driver
 
     // print heap stats every minute
     while(1) {
         heap_caps_print_heap_info(MALLOC_CAP_DEFAULT);
-        vTaskDelay(60000 / portTICK_PERIOD_MS);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 }
